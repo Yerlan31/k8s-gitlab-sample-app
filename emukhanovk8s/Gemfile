@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+
+gem 'sinatra'
+gem 'httparty'
+
+gem 'rake'
+gem 'pg'
+gem 'activerecord', require: 'active_record'
+gem 'sinatra-activerecord', require: 'sinatra/activerecord'
+
+# gem 'sinatra-contrib'
+gem 'byebug', require: ['byebug', 'byebug/core']

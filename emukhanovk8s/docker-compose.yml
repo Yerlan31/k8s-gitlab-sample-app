@@ -1,0 +1,25 @@
+version: '3.4'
+services:
+  one:
+    image: gitlab.akb-it.ru:4567/emukhanov/emukhanovk8s:stateful
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/usr/src/
+    environment:
+      APP_ENV: default_env
+      DATABASE_URL: postgresql://user:password@db:5432/one_db?pool=5
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: one_db
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:

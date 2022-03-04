@@ -1,0 +1,39 @@
+stages:
+  - builds
+  - tests
+  - deploys
+
+build:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  image: docker:latest
+  stage: builds
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY 
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+
+start:review:
+  stage: deploys
+  image: alpine/k8s:1.21.2
+  script:
+    - helm install --set image.tag=$CI_COMMIT_REF_NAME $CI_ENVIRONMENT_SLUG helm
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://emukhanov-$CI_ENVIRONMENT_SLUG.app.cs.phoenixit.ru
+    on_stop: stop:review
+    auto_stop_in: 10 minutes
+  #rules
+  #  - if: $CI_MERGE_REQUEST_ID
+
+stop:review:
+  stage: deploys
+  image: alpine/k8s:1.21.2
+  script:
+    - helm uninstall $CI_ENVIRONMENT_SLUG helm
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+  rules:
+    - when: manual
+  #  - if: $CI_MERGE_REQUEST_ID
